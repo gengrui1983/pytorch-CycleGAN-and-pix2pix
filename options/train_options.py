@@ -29,4 +29,8 @@ class TrainOptions(BaseOptions):
         self.parser.add_argument('--lr_policy', type=str, default='lambda', help='learning rate policy: lambda|step|plateau')
         self.parser.add_argument('--lr_decay_iters', type=int, default=50, help='multiply by a gamma every lr_decay_iters iterations')
 
+        self.parser.add_argument('--lambda_feat', type=float, default=10.0, help='weight for feature matching loss')
+        self.parser.add_argument('--num_D', type=int, default=2, help='number of discriminators to use')
+        self.parser.add_argument('--no_ganFeat_loss', action='store_true', help='if specified, do *not* use discriminator feature matching loss')
+
         self.isTrain = True

@@ -54,3 +54,7 @@ def mkdirs(paths):
 def mkdir(path):
     if not os.path.exists(path):
         os.makedirs(path)
+
+
+def calculate_size(length, f, p, s):
+    return int((length - f + 2 * p) / s + 1)

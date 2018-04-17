@@ -5,6 +5,10 @@ def create_model(opt):
         assert(opt.dataset_mode == 'unaligned')
         from .cycle_gan_model import CycleGANModel
         model = CycleGANModel()
+    elif opt.model == 'pix2pix_mlp':
+        assert (opt.dataset_mode == 'aligned')
+        from .pix2pix_fc_model import Pix2PixFCModel
+        model = Pix2PixFCModel()
     elif opt.model == 'pix2pix':
         assert(opt.dataset_mode == 'aligned')
         from .pix2pix_model import Pix2PixModel
