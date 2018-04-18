@@ -85,22 +85,13 @@ class Pix2PixModel(BaseModel):
         fake_AB = self.fake_AB_pool.query(torch.cat((self.real_A, self.fake_B), 1).data)
         pred_fake_pool = self.netD.forward(fake_AB)
 
-        # print(pred_fake[-1][-1])
-
         self.loss_D_fake = 0
-        # for i in range(len(pred_fake_pool)):
-            # self.loss_D_fake += self.criterionGAN(pred_fake_pool[i][-1], False)
         self.loss_D_fake = self.criterionGAN(pred_fake_pool, False)
-
-        # print(self.loss_D_fake)
 
         # Real
         real_AB = torch.cat((self.real_A, self.real_B), 1)
         self.pred_real = self.netD.forward(real_AB)
         self.loss_D_real = self.criterionGAN(self.pred_real, True)
-        # self.loss_D_real = 0
-        # for i in range(len(self.pred_real)):
-        #     self.loss_D_real += self.criterionGAN(self.pred_real[i][-1], True)
 
         #
         # Combined loss
@@ -113,9 +104,6 @@ class Pix2PixModel(BaseModel):
         fake_AB = torch.cat((self.real_A, self.fake_B), 1)
         self.pred_fake = self.netD.forward(fake_AB)
 
-        # self.loss_G_GAN = 0
-        # for i in range(len(self.pred_fake)):
-        #     self.loss_G_GAN += self.criterionGAN(self.pred_fake[i][-1], False)
         self.loss_G_GAN = self.criterionGAN(self.pred_fake, True)
 
         # Feature matching
@@ -129,11 +117,10 @@ class Pix2PixModel(BaseModel):
                                        self.criterionL1(self.pred_fake[i][j], self.pred_real[i][j].detach()) * self.opt.lambda_feat
 
 
-        # Second, G(A) = B
+        # Second, G(A) = B2
         self.loss_G_L1 = self.criterionL1(self.fake_B, self.real_B) * self.opt.lambda_A
 
-        # self.loss_G = self.loss_G_GAN + self.loss_G_L1 + self.loss_G_GAN_Feat
-        self.loss_G = self.loss_G_GAN + self.loss_G_L1
+        self.loss_G = self.loss_G_GAN + self.loss_G_L1 + self.loss_G_GAN_Feat
 
         self.loss_G.backward()
 

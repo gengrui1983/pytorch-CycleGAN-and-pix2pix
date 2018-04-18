@@ -473,18 +473,14 @@ class NFeatureScalesLayerDiscriminator(nn.Module):
             nn.LeakyReLU(0.2, True)
         ]]
 
-        # sequence += [[nn.Conv2d(nf, 1, kernel_size=kw, stride=1, padding=padw)]]
         # print("use_sigmoid:", use_sigmoid)
+        sequence += [[nn.Conv2d(nf, 1, kernel_size=kw, stride=1, padding=padw)]]
         if use_sigmoid:
-            sequence += [[nn.Conv2d(nf, 1, kernel_size=kw, stride=1, padding=padw)]]
             sequence += [[nn.Sigmoid()]]
-        else:
-            sequence += [[nn.Conv2d(nf, 1, kernel_size=kw, stride=1, padding=padw)]]
 
         if getIntermFeat:
             for n in range(len(sequence)):
                 setattr(self, 'model'+str(n), nn.Sequential(*sequence[n]))
-                # print(sequence[n])
         else:
             sequence_stream = []
             for n in range(len(sequence)):
