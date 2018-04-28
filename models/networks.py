@@ -129,7 +129,7 @@ def define_G(input_nc, output_nc, ngf, which_model_netG, norm='batch', use_dropo
 
 
 def define_D(input_nc, ndf, which_model_netD,
-             n_layers_D=3, norm='batch', use_sigmoid=False, init_type='normal', gpu_ids=[], getIntermFeat=False):
+             n_layers_D=3, norm='batch', use_sigmoid=False, init_type='normal', num_D=3, gpu_ids=[], getIntermFeat=False):
     netD = None
     use_gpu = len(gpu_ids) > 0
     norm_layer = get_norm_layer(norm_type=norm)
@@ -144,7 +144,7 @@ def define_D(input_nc, ndf, which_model_netD,
         netD = PixelDiscriminator(input_nc, ndf, norm_layer=norm_layer, use_sigmoid=use_sigmoid, gpu_ids=gpu_ids)
     elif which_model_netD == 'multi_scale':
         norm_layer = get_norm_layer("instance")
-        netD = MultiscaleDiscriminator(input_nc, ndf, n_layers=n_layers_D, use_sigmoid=use_sigmoid,
+        netD = MultiscaleDiscriminator(input_nc, ndf, num_D=num_D,n_layers=n_layers_D, use_sigmoid=use_sigmoid,
                                        norm_layer=norm_layer, getIntermFeat = getIntermFeat)
     else:
         raise NotImplementedError('Discriminator model name [%s] is not recognized' %
@@ -454,7 +454,10 @@ class NFeatureScalesLayerDiscriminator(nn.Module):
 
         kw = 4
         padw = int(np.ceil((kw-1.0)/2))
-        sequence = [[nn.Conv2d(input_nc, ndf, kernel_size=kw, stride=2, padding=padw), nn.LeakyReLU(0.2, True)]]
+        sequence = [[nn.Conv2d(input_nc, ndf, kernel_size=kw, stride=2, padding=padw),
+                     nn.LeakyReLU(0.2, True)
+                     # nn.Sigmoid()
+                     ]]
 
         nf = ndf
         for n in range(1, n_layers):
@@ -463,6 +466,7 @@ class NFeatureScalesLayerDiscriminator(nn.Module):
             sequence += [[
                 nn.Conv2d(nf_prev, nf, kernel_size=kw, stride=2, padding=padw),
                 norm_layer(nf), nn.LeakyReLU(0.2, True)
+                # nn.Sigmoid()
             ]]
 
         nf_prev = nf
@@ -471,12 +475,14 @@ class NFeatureScalesLayerDiscriminator(nn.Module):
             nn.Conv2d(nf_prev, nf, kernel_size=kw, stride=1, padding=padw),
             norm_layer(nf),
             nn.LeakyReLU(0.2, True)
+            # nn.Sigmoid()
         ]]
 
         # sequence += [[nn.Conv2d(nf, 1, kernel_size=kw, stride=1, padding=padw)]]
         # print("use_sigmoid:", use_sigmoid)
         if use_sigmoid:
-            sequence += [[nn.Conv2d(nf, 1, kernel_size=kw, stride=1, padding=padw)]]
+            sequence += [[nn.Conv2d(nf, 1, kernel_size=kw, stride=1, padding=padw),
+                          nn.Sigmoid()]]
             sequence += [[nn.Sigmoid()]]
         else:
             sequence += [[nn.Conv2d(nf, 1, kernel_size=kw, stride=1, padding=padw)]]

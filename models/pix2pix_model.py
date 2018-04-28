@@ -23,7 +23,8 @@ class Pix2PixModel(BaseModel):
             use_sigmoid = opt.no_lsgan
             self.netD = networks.define_D(opt.input_nc + opt.output_nc, opt.ndf,
                                           opt.which_model_netD,
-                                          opt.n_layers_D, opt.norm, use_sigmoid, opt.init_type, self.gpu_ids, not opt.no_ganFeat_loss)
+                                          opt.n_layers_D, opt.norm, use_sigmoid, opt.init_type, num_D=opt.num_D,
+                                          gpu_ids=self.gpu_ids, getIntermFeat=not opt.no_ganFeat_loss)
         if not self.isTrain or opt.continue_train:
             self.load_network(self.netG, 'G', opt.which_epoch)
             if self.isTrain:
@@ -96,7 +97,7 @@ class Pix2PixModel(BaseModel):
 
         # Real
         real_AB = torch.cat((self.real_A, self.real_B), 1)
-        self.pred_real = self.netD.forward(real_AB)
+        self.pred_real = self.netD(real_AB)
         self.loss_D_real = self.criterionGAN(self.pred_real, True)
         # self.loss_D_real = 0
         # for i in range(len(self.pred_real)):
@@ -111,7 +112,7 @@ class Pix2PixModel(BaseModel):
     def backward_G(self):
         # First, G(A) should fake the discriminator
         fake_AB = torch.cat((self.real_A, self.fake_B), 1)
-        self.pred_fake = self.netD.forward(fake_AB)
+        self.pred_fake = self.netD(fake_AB)
 
         # self.loss_G_GAN = 0
         # for i in range(len(self.pred_fake)):
@@ -120,7 +121,8 @@ class Pix2PixModel(BaseModel):
 
         # Feature matching
         self.loss_G_GAN_Feat = 0
-        if not self.no_ganFeat_loss:
+        # if not self.no_ganFeat_loss:
+        if False:
             feat_weights = 4.0 / (self.opt.n_layers_D + 1)
             D_weights = 1.0 / self.opt.num_D
             for i in range(self.opt.num_D):
@@ -149,18 +151,23 @@ class Pix2PixModel(BaseModel):
         self.optimizer_G.step()
 
     def get_current_errors(self):
-        return OrderedDict([('G_GAN', self.loss_G_GAN.data[0]),
-                            ('G_GAN_feature', self.loss_G_GAN_Feat.data[0]),
-                            ('G_L1', self.loss_G_L1.data[0]),
-                            ('D_real', self.loss_D_real.data[0]),
-                            ('D_fake', self.loss_D_fake.data[0])
-                            ]) if not self.no_ganFeat_loss else OrderedDict([('G_GAN', self.loss_G_GAN.data[0]),
+        if self.no_ganFeat_loss:
+            return OrderedDict([('G_GAN', self.loss_G_GAN.data[0]),
                      ('G_L1', self.loss_G_L1.data[0]),
                      ('D_real', self.loss_D_real.data[0]),
                      ('D_fake', self.loss_D_fake.data[0])
                      ])
-
-
+        else:
+            # print("gganfeat", self.loss_G_GAN_Feat)
+            # print("l1", self.loss_G_L1)
+            # print("real", self.loss_D_real)
+            # print("fake", self.loss_D_fake)
+            return OrderedDict([('G_GAN', self.loss_G_GAN),
+                            ('G_GAN_feature', self.loss_G_GAN_Feat),
+                            ('G_L1', self.loss_G_L1.data),
+                            ('D_real', self.loss_D_real.data),
+                            ('D_fake', self.loss_D_fake.data)
+                            ])
 
     def get_current_visuals(self):
         real_A = util.tensor2im(self.real_A.data)
