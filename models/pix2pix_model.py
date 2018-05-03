@@ -14,7 +14,8 @@ class Pix2PixModel(BaseModel):
     def initialize(self, opt):
         BaseModel.initialize(self, opt)
         self.isTrain = opt.isTrain
-        self.no_ganFeat_loss = opt.no_ganFeat_loss
+        if self.isTrain:
+            self.no_ganFeat_loss = opt.no_ganFeat_loss
 
         # load/define networks
         self.netG = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf,
@@ -121,8 +122,8 @@ class Pix2PixModel(BaseModel):
 
         # Feature matching
         self.loss_G_GAN_Feat = 0
-        # if not self.no_ganFeat_loss:
-        if False:
+        if not self.no_ganFeat_loss:
+        # if False:
             feat_weights = 4.0 / (self.opt.n_layers_D + 1)
             D_weights = 1.0 / self.opt.num_D
             for i in range(self.opt.num_D):
@@ -158,15 +159,11 @@ class Pix2PixModel(BaseModel):
                      ('D_fake', self.loss_D_fake.data[0])
                      ])
         else:
-            # print("gganfeat", self.loss_G_GAN_Feat)
-            # print("l1", self.loss_G_L1)
-            # print("real", self.loss_D_real)
-            # print("fake", self.loss_D_fake)
-            return OrderedDict([('G_GAN', self.loss_G_GAN),
-                            ('G_GAN_feature', self.loss_G_GAN_Feat),
-                            ('G_L1', self.loss_G_L1.data),
-                            ('D_real', self.loss_D_real.data),
-                            ('D_fake', self.loss_D_fake.data)
+            return OrderedDict([('G_GAN', self.loss_G_GAN.data[0]),
+                            ('G_GAN_feature', self.loss_G_GAN_Feat.data[0]),
+                            ('G_L1', self.loss_G_L1.data[0]),
+                            ('D_real', self.loss_D_real.data[0]),
+                            ('D_fake', self.loss_D_fake.data[0])
                             ])
 
     def get_current_visuals(self):

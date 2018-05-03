@@ -490,7 +490,6 @@ class NFeatureScalesLayerDiscriminator(nn.Module):
         if getIntermFeat:
             for n in range(len(sequence)):
                 setattr(self, 'model'+str(n), nn.Sequential(*sequence[n]))
-                # print(sequence[n])
         else:
             sequence_stream = []
             for n in range(len(sequence)):
