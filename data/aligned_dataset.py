@@ -33,6 +33,12 @@ class AlignedDataset(BaseDataset):
         A = transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))(A)
         B = transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))(B)
 
+        if self.opt.use_dist:
+            dist = float(AB_path.split("/")[-1].split("_")[1])
+            # print("path: {}, dist:{}".format(AB_path, dist))
+            padding = torch.ones(1, self.opt.fineSize, self.opt.fineSize) * dist
+            A = torch.cat((A, padding), 0)
+
         if self.opt.which_direction == 'BtoA':
             input_nc = self.opt.output_nc
             output_nc = self.opt.input_nc

@@ -1,5 +1,6 @@
 import os
 import sys
+import geopy.distance
 from PIL import Image
 
 def combineAB(A, B, counter):
@@ -22,7 +23,16 @@ def combineAB(A, B, counter):
     if not os.path.exists(desRoot):
         os.makedirs(desRoot)
 
-    new_im.save('{}{}.jpg'.format(desRoot, counter))
+    a1 = A.split("/")[-1].split(".jpg")[0].split("_")[1]
+    a2 = A.split("/")[-1].split(".jpg")[0].split("_")[2]
+    b1 = B.split("/")[-1].split(".jpg")[0].split("_")[1]
+    b2 = B.split("/")[-1].split(".jpg")[0].split("_")[2]
+
+    a_co = (a1, a2)
+    b_co = (b1, b2)
+    dis = geopy.distance.vincenty(a_co, b_co).m
+
+    new_im.save('{}{}_{}_.jpg'.format(desRoot, counter, dis))
 
 
 rootdir = '../datasets/streetview_jpg/'
@@ -38,14 +48,16 @@ for subdir, dirs, files in os.walk(rootdir):
     dirs.sort(reverse=True)
 
     if testing and counter > 10: break
-    for file in sorted(files, reverse=True):
+
+    files.sort(key=lambda x: int(x.split("_")[0]))
+    for file in files:
         sameDir = prevFile != "" and prevSubDir == subdir
 
         if sameDir:
             current = os.path.join(subdir, file)
             prev = os.path.join(subdir, prevFile)
 
-            combineAB(current, prev, counter)
+            combineAB(prev, current, counter)
             counter += 1
             if testing and counter == 10: break
         prevSubDir = subdir
