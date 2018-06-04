@@ -41,6 +41,10 @@ class BaseOptions():
         self.parser.add_argument('--no_flip', action='store_true', help='if specified, do not flip the images for data augmentation')
         self.parser.add_argument('--init_type', type=str, default='normal', help='network initialization [normal|xavier|kaiming|orthogonal]')
         self.parser.add_argument('--use_dist', action='store_true', help='use the distance between A and B as a independent channel.')
+        self.parser.add_argument('--for_seg', action='store_true', help='For learning the segmentations.')
+        self.parser.add_argument('--generate_fake_b', action='store_true', help='For generating the fake B image.')
+        self.parser.add_argument('--for_segB', action='store_true', help='For generating the fake B image.')
+        self.parser.add_argument('--phase2', action='store_true', help='For training the data in the second phase, with the generated fakeB, segmentations and the reals')
 
         self.initialized = True
 

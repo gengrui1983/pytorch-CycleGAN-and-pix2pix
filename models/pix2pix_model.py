@@ -167,7 +167,8 @@ class Pix2PixModel(BaseModel):
                             ])
 
     def get_current_visuals(self):
-        real_A = util.tensor2im(self.real_A.data)
+        # print("get current A:{}B:{}fake_B:{}".format(self.real_A.data, self.real_B.data, self.fake_B.data))
+        real_A = util.tensor2im(self.real_A.data[:, :3, :, :])
         fake_B = util.tensor2im(self.fake_B.data)
         real_B = util.tensor2im(self.real_B.data)
         return OrderedDict([('real_A', real_A), ('fake_B', fake_B), ('real_B', real_B)])

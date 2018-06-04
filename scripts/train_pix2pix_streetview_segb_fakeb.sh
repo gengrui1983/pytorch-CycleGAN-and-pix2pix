@@ -1,6 +1,6 @@
-NAME=streetview_pix2pix-multiscale-feature_matching_small_dist
+NAME=streetview_pix2pix_segb
 MODEL_NAME=pix2pix
-DATA_ROOT=./datasets/new_streetview
+DATA_ROOT=./datasets/streetview_seg
 
 python train.py \
     --dataroot $DATA_ROOT \
@@ -15,5 +15,8 @@ python train.py \
     --norm batch \
     --pool_size 0 \
     --num_D 3 \
+    --for_seg \
     --use_dist \
-    --input_nc 4
+    --for_segB \
+    --generate_fake_b \
+    --input_nc 7

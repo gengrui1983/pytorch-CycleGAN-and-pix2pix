@@ -5,8 +5,16 @@ from data.base_data_loader import BaseDataLoader
 def CreateDataset(opt):
     dataset = None
     if opt.dataset_mode == 'aligned':
-        from data.aligned_dataset import AlignedDataset
-        dataset = AlignedDataset()
+        if opt.for_seg:
+            if opt.phase2:
+                from data.aligned_dataset_for_seg_phase2 import AlignedDatasetForSeg
+                dataset = AlignedDatasetForSeg()
+            else:
+                from data.aligned_dataset_for_seg import AlignedDatasetForSeg
+                dataset = AlignedDatasetForSeg()
+        else:
+            from data.aligned_dataset import AlignedDataset
+            dataset = AlignedDataset()
     elif opt.dataset_mode == 'unaligned':
         from data.unaligned_dataset import UnalignedDataset
         dataset = UnalignedDataset()
